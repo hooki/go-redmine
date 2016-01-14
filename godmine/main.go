@@ -659,6 +659,17 @@ func editWikiPage(title string) error {
 	return nil
 }
 
+func listVersions(projectId int) {
+	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
+	versions, err := c.Versions(projectId)
+	if err != nil {
+		fatal("Failed to list memberships: %s\n", err)
+	}
+	for _, i := range versions {
+		fmt.Printf("%4d: %s\n", i.Id, i.Name)
+	}
+}
+
 func usage() {
 	fmt.Println(`godmine <command> <subcommand> [arguments]
 
@@ -729,6 +740,10 @@ Wiki Commands:
 
   edit     e edit wiki page griven by title with editor
              $ godmine w e home
+
+Version Commands:
+   list    l listing versions of given project.
+             $ godmine v l 1
 `)
 	os.Exit(1)
 }
@@ -966,6 +981,19 @@ func main() {
 				usage()
 			}
 			break
+	case "v", "version":
+		switch flag.Arg(1) {
+		case "l", "list":
+				if flag.NArg() == 3 {
+				projectId, err := strconv.Atoi(flag.Arg(2))
+				if err != nil {
+					fatal("Invalid project id: %s\n", err)
+				}
+				listVersions(projectId)
+			} else {
+				usage()
+			}
+		}
 		default:
 			usage()
 

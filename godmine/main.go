@@ -451,13 +451,13 @@ UpdatedOn: %s
 		project.Description)
 }
 
-func listProjects() {
+func listProjects(offset int, limit int) {
 	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
-	issues, err := c.Projects()
+	projects, err := c.Projects(offset, limit)
 	if err != nil {
 		fatal("Failed to list projects: %s\n", err)
 	}
-	for _, i := range issues {
+	for _, i := range projects {
 		fmt.Printf("%4d: %s\n", i.Id, i.Name)
 	}
 }
@@ -679,7 +679,7 @@ Project Commands:
              $ godmine p d 1
 
   list     l listing projects.
-             $ godmine p l
+             $ godmine p l 0 100
 
 Issue Commands:
   add      a create issue with text editor.
@@ -857,7 +857,19 @@ func main() {
 			}
 			break
 		case "l", "list":
-			listProjects()
+			if flag.NArg() == 4 {
+				offset, err := strconv.Atoi(flag.Arg(2))
+				if err != nil {
+					fatal("Invalid offset: %s\n", err)
+				}
+				limit, err := strconv.Atoi(flag.Arg(3))
+				if err != nil {
+					fatal("Invalid limit count: %s\n", err)
+				}
+				listProjects(offset, limit)
+			} else {
+				usage()
+			}
 			break
 		default:
 			usage()

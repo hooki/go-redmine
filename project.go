@@ -53,8 +53,9 @@ func (c *client) Project(id int) (*Project, error) {
 	return &r.Project, nil
 }
 
-func (c *client) Projects() ([]Project, error) {
-	res, err := c.Get(c.endpoint + "/projects.json?key=" + c.apikey)
+func (c *client) Projects(offset int, limit int) ([]Project, error) {
+	uri := fmt.Sprintf("/projects.json?key=%s&offset=%d&limit=%d", c.apikey, offset, limit)
+	res, err := c.Get(c.endpoint + uri)
 	if err != nil {
 		return nil, err
 	}
